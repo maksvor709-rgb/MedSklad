@@ -1,10 +1,26 @@
 {
+  "id": "./",
   "name": "МедСклад — облік медикаментів",
   "short_name": "МедСклад",
-  "start_url": "./index.html",
+  "description": "Облік медикаментів, партій, термінів придатності та руху запасів",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#f3f8f8",
   "theme_color": "#08796f",
-  "lang": "uk",
-  "description": "PWA для обліку медикаментів"
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
 }

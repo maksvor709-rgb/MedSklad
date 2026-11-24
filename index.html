@@ -212,7 +212,31 @@ function download(name,data,type){let a=document.createElement('a'),url=URL.crea
 function exportJSON(){download('medsklad-backup-'+today()+'.json',JSON.stringify(db,null,2),'application/json')}
 function exportCSV(){let rows=[['Назва','Дозування','Форма','Штрихкод','Серія','Кількість','Одиниця','Ціна за одиницю, грн','Вартість партії, грн','Термін придатності']];db.items.forEach(i=>i.batches.forEach(b=>rows.push([i.name,i.dose,i.form,i.barcode,b.lot,b.qty,'шт.',b.price||0,(Number(b.qty)||0)*(Number(b.price)||0),b.expiry])));let csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\n');download('medsklad-zalyshky-'+today()+'.csv',csv,'text/csv;charset=utf-8')}
 function restoreJSON(){let f=document.getElementById('restoreFile').files[0];if(!f)return alert('Виберіть JSON-файл');let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!Array.isArray(x.items)||!Array.isArray(x.moves))throw Error();if(confirm('Замінити поточні дані даними з резервної копії?')){db=x;persist();alert('Дані відновлено')}}catch(e){alert('Файл резервної копії не розпізнано')}};r.readAsText(f)}
-if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  const hadController = !!navigator.serviceWorker.controller;
+  let refreshing = false;
+
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (hadController && !refreshing && navigator.serviceWorker.controller) {
+      refreshing = true;
+      location.reload();
+    }
+  });
+
+  navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
+    .then(registration => {
+      // Перевірити, чи з'явилася нова версія одразу після відкриття програми.
+      registration.update().catch(() => {});
+
+      // Повторна перевірка, коли користувач повертається до відкритого додатка.
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          registration.update().catch(() => {});
+        }
+      });
+    })
+    .catch(error => console.warn('Не вдалося перевірити оновлення МедСкладу:', error));
+}
 render();
 </script>
 </body></html>
